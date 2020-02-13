@@ -159,3 +159,5 @@ dmypy.json
 # Ignore all local history of files
 .history
 
+# data
+output/*.csv

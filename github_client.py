@@ -7,9 +7,11 @@ from model import Issue
 
 class GithubIssuesClient:
 
-    def __init__(self, repo_url):
+    def __init__(self, repo_url, username, token):
         urllib3.disable_warnings()
+        headers = urllib3.util.make_headers(basic_auth=f'{username}:{token}')
         self.http = urllib3.PoolManager(headers={'user-agent': 'curl/7.64.1'})
+        self.http.headers.update(headers)
         self.repo_url = repo_url
         self.api_url = 'https://api.github.com/repos/%s/%s/issues' % tuple(repo_url.rsplit('/', 2)[-2:])
         self.url_pattern = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)')
@@ -29,13 +31,13 @@ class GithubIssuesClient:
         while True:
             page_url = f'{self.api_url}?page={page}'
             status, headers, issues = self._get(page_url)
-        if status:
-            if not issues:
-                return issue_list
-            issue_list.extend(issues)
-            page += 1
-        else:
-            raise Exception(f'[Error] {issues["message"]}')
+            if status:
+                if not issues:
+                    return issue_list
+                issue_list.extend(issues)
+                page += 1
+            else:
+                raise Exception(f'[Error] {issues["message"]}')
 
     def inspect_issue(self, issue: dict) -> bool:
         # GitHub's REST API v3 compatible fix
