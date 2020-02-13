@@ -11,7 +11,7 @@ OUTPUT_DIR = pathlib.Path(os.path.abspath(__file__)).parent / 'output'
 
 
 @async_retry(tries=2)
-async def check(issue: dict, client: GithubIssuesClient, csv_writer: csv._writer) -> None:
+async def check(issue: dict, client: GithubIssuesClient, csv_writer) -> None:
     if client.inspect_issue(issue):
         issue_data = client.parse_issue(issue)
         issue_labels = ','.join(issue_data.labels)
